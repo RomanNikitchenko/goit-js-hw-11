@@ -6,6 +6,7 @@ const btnLoadMore = document.querySelector(".load-more");
 
 
 let name = '';
+let page = 2;
 
 
 form.addEventListener("submit", onSearch);
@@ -18,7 +19,7 @@ async function onSearch(e) {
   name = searchQuery.value
 
   try {
-    const picture = await fetchPixabay(name);
+    const picture = await fetchPixabay(name, page);
     const { total, totalHits, hits } = picture;
     console.log(hits);
   } catch {
@@ -30,7 +31,7 @@ async function onSearch(e) {
 btnLoadMore.addEventListener('click', onLoadMore);
 
 async function onLoadMore() {
-  const pictureMore = await fetchPixabay(name);
+  const pictureMore = await fetchPixabay(name, page);
   const { total, totalHits, hits } = pictureMore;
   console.log(hits);
 };
