@@ -1,17 +1,29 @@
 import './css/styles.css';
 import fetchPixabay from './fetchPixabayserver';
+import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const form = document.querySelector("#search-form");
 const btnLoadMore = document.querySelector(".load-more");
 const gallery = document.querySelector(".gallery");
 
+btnLoadMore.classList.add("is-hidden");
+
 let name = '';
 let page = 1;
+let limit = 5;
 
 const doStuff = async (name, page) => {
   try {
-    const picture = await fetchPixabay(name, page);
+    const picture = await fetchPixabay(name, page, limit);
     const { total, totalHits, hits } = picture;
+    if (!hits.length) {
+      Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+      btnLoadMore.classList.add("is-hidden");
+      return;
+    } else if (hits.length < limit) {
+      Notify.info("We're sorry, but you've reached the end of search results.");
+      btnLoadMore.classList.add("is-hidden");
+    };
     renderPosts(hits);
   } catch (error) {
     console.log(error.message);
@@ -20,20 +32,24 @@ const doStuff = async (name, page) => {
 
 form.addEventListener("submit", onSearch);
 
-async function onSearch(e) {
+function onSearch(e) {
   e.preventDefault();
 
   const { elements } = e.currentTarget;
   const { searchQuery } = elements;
 
   if (!searchQuery.value) {
+    Notify.warning("line is empty");
+    gallery.innerHTML = '';
+    btnLoadMore.classList.add("is-hidden");
     return
   };
+
+  btnLoadMore.classList.remove("is-hidden");
 
   gallery.innerHTML = '';
 
   name = searchQuery.value;
-
   page = 1;
 
   doStuff(name, page);
@@ -44,7 +60,7 @@ async function onSearch(e) {
 
 btnLoadMore.addEventListener('click', onLoadMore);
 
-async function onLoadMore() {
+function onLoadMore() {
   page += 1;
 
   doStuff(name, page);
