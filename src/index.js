@@ -1,4 +1,5 @@
 import './css/styles.css';
+import debounce from 'lodash.debounce';
 import fetchPixabay from './fetchPixabayserver';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
@@ -12,7 +13,7 @@ let name = '';
 let page = 1;
 let limit = 5;
 
-const doStuff = async (name, page) => {
+async function doStuff(name, page) {
   try {
     const picture = await fetchPixabay(name, page, limit);
     const { total, totalHits, hits } = picture;
@@ -73,7 +74,7 @@ function onSearch(e) {
 };
 
 
-btnLoadMore.addEventListener('click', onLoadMore);
+btnLoadMore.addEventListener('click', debounce(onLoadMore, 300));
 
 function onLoadMore() {
   page += 1;
