@@ -16,18 +16,36 @@ const doStuff = async (name, page) => {
   try {
     const picture = await fetchPixabay(name, page, limit);
     const { total, totalHits, hits } = picture;
+
     if (!hits.length) {
       Notify.failure("Sorry, there are no images matching your search query. Please try again.");
       btnLoadMore.classList.add("is-hidden");
+      setTimeout(() => {
+        gallery.innerHTML = '';
+      }, 300);
       return;
+    } else if (hits.length < limit && page === 1) {
+      Notify.success(`Hooray! We found ${totalHits} images.`);
+      btnLoadMore.classList.add("is-hidden");
+      setTimeout(() => {
+        gallery.innerHTML = '';
+      }, 300);
     } else if (hits.length < limit) {
       Notify.info("We're sorry, but you've reached the end of search results.");
       btnLoadMore.classList.add("is-hidden");
+    } else if (page === 1) {
+      Notify.success(`Hooray! We found ${totalHits} images.`);
+      gallery.innerHTML = '';
+      setTimeout(() => {
+        btnLoadMore.classList.remove("is-hidden");
+      }, 300);
     };
-    renderPosts(hits);
+    setTimeout(() => {
+      renderPosts(hits);
+    }, 300);
   } catch (error) {
     console.log(error.message);
-  }
+  };
 };
 
 form.addEventListener("submit", onSearch);
@@ -40,18 +58,15 @@ function onSearch(e) {
 
   if (!searchQuery.value) {
     Notify.warning("line is empty");
-    gallery.innerHTML = '';
     btnLoadMore.classList.add("is-hidden");
+    setTimeout(() => {
+      gallery.innerHTML = '';
+    }, 250);
     return
   };
 
-  btnLoadMore.classList.remove("is-hidden");
-
-  gallery.innerHTML = '';
-
   name = searchQuery.value;
   page = 1;
-
   doStuff(name, page);
 
   searchQuery.value = '';
