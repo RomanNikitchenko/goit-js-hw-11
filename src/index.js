@@ -11,7 +11,7 @@ btnLoadMore.classList.add("is-hidden");
 
 let name = '';
 let page = 1;
-let limit = 5;
+let limit = 40;
 
 async function doStuff(name, page) {
   try {
@@ -39,11 +39,32 @@ async function doStuff(name, page) {
       gallery.innerHTML = '';
       setTimeout(() => {
         btnLoadMore.classList.remove("is-hidden");
-      }, 300);
+      }, 500);
+    } else {
+      setTimeout(() => {
+        btnLoadMore.classList.remove("is-hidden");
+      }, 500);
     };
+
     setTimeout(() => {
       renderPosts(hits);
+      setTimeout(() => {
+
+        const photoCards = document.querySelectorAll(".photo-card");
+
+        if (hits.length > 1) {
+          photoCards.forEach(photoCard => {
+            photoCard.classList.remove("is-hidden");
+          });
+        } else if (hits.length === 1) {
+          const lastElementArray = photoCards[photoCards.length - 1];
+          lastElementArray.classList.remove("is-hidden");
+        };
+
+      }, 200);
     }, 300);
+
+
   } catch (error) {
     console.log(error.message);
   };
@@ -54,21 +75,24 @@ form.addEventListener("submit", onSearch);
 function onSearch(e) {
   e.preventDefault();
 
+  btnLoadMore.classList.add("is-hidden");
+
   const { elements } = e.currentTarget;
   const { searchQuery } = elements;
 
   if (!searchQuery.value) {
     Notify.warning("line is empty");
-    btnLoadMore.classList.add("is-hidden");
     setTimeout(() => {
       gallery.innerHTML = '';
-    }, 250);
+    }, 300);
     return
   };
 
   name = searchQuery.value;
   page = 1;
-  doStuff(name, page);
+  setTimeout(() => {
+    doStuff(name, page);
+  }, 300);
 
   searchQuery.value = '';
 };
@@ -77,6 +101,7 @@ function onSearch(e) {
 btnLoadMore.addEventListener('click', debounce(onLoadMore, 300));
 
 function onLoadMore() {
+  btnLoadMore.classList.add("is-hidden");
   page += 1;
 
   doStuff(name, page);
@@ -86,7 +111,7 @@ function onLoadMore() {
 function renderPosts(hits) {
   const markup = hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
     return `
-      <div class="photo-card">
+      <div class="photo-card is-hidden">
         <img src="${webformatURL}" alt="${tags}" loading="lazy" />
         <div class="info">
           <p class="info-item">
