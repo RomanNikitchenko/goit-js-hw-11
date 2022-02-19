@@ -4,6 +4,7 @@ import fetchPixabay from './fetchPixabayserver';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 const form = document.querySelector("#search-form");
+const submit = document.querySelector('[type="submit"]');
 const btnLoadMore = document.querySelector(".load-more");
 const gallery = document.querySelector(".gallery");
 
@@ -12,6 +13,7 @@ btnLoadMore.classList.add("is-hidden");
 let name = '';
 let page = 1;
 let limit = 40;
+let disabled = false;
 
 async function doStuff(name, page) {
   try {
@@ -20,26 +22,38 @@ async function doStuff(name, page) {
 
     if (!hits.length) {
       Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+
       btnLoadMore.classList.add("is-hidden");
+
       setTimeout(() => {
         gallery.innerHTML = '';
       }, 300);
+
       return;
+
     } else if (hits.length < limit && page === 1) {
       Notify.success(`Hooray! We found ${totalHits} images.`);
+
       btnLoadMore.classList.add("is-hidden");
+
       setTimeout(() => {
         gallery.innerHTML = '';
       }, 300);
+
     } else if (hits.length < limit) {
       Notify.info("We're sorry, but you've reached the end of search results.");
+
       btnLoadMore.classList.add("is-hidden");
+
     } else if (page === 1) {
       Notify.success(`Hooray! We found ${totalHits} images.`);
+
       gallery.innerHTML = '';
+
       setTimeout(() => {
         btnLoadMore.classList.remove("is-hidden");
       }, 500);
+
     } else {
       setTimeout(() => {
         btnLoadMore.classList.remove("is-hidden");
@@ -49,7 +63,6 @@ async function doStuff(name, page) {
     setTimeout(() => {
       renderPosts(hits);
       setTimeout(() => {
-
         const photoCards = document.querySelectorAll(".photo-card");
 
         if (hits.length > 1) {
@@ -58,9 +71,9 @@ async function doStuff(name, page) {
           });
         } else if (hits.length === 1) {
           const lastElementArray = photoCards[photoCards.length - 1];
+
           lastElementArray.classList.remove("is-hidden");
         };
-
       }, 200);
     }, 300);
 
@@ -75,6 +88,18 @@ form.addEventListener("submit", onSearch);
 function onSearch(e) {
   e.preventDefault();
 
+  if (disabled) {
+    return;
+  };
+  disabled = true;
+
+  submit.setAttribute("disabled", "disabled");
+
+  setTimeout(() => {
+    submit.removeAttribute("disabled");
+    disabled = false;
+  }, 1000);
+
   btnLoadMore.classList.add("is-hidden");
 
   const { elements } = e.currentTarget;
@@ -82,14 +107,17 @@ function onSearch(e) {
 
   if (!searchQuery.value) {
     Notify.warning("line is empty");
+
     setTimeout(() => {
       gallery.innerHTML = '';
     }, 300);
+
     return
   };
 
   name = searchQuery.value;
   page = 1;
+
   setTimeout(() => {
     doStuff(name, page);
   }, 300);
@@ -102,6 +130,7 @@ btnLoadMore.addEventListener('click', debounce(onLoadMore, 300));
 
 function onLoadMore() {
   btnLoadMore.classList.add("is-hidden");
+  
   page += 1;
 
   doStuff(name, page);
