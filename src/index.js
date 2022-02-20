@@ -2,6 +2,8 @@ import './css/styles.css';
 import debounce from 'lodash.debounce';
 import fetchPixabay from './fetchPixabayserver';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import SimpleLightbox from 'simplelightbox';
+import 'simplelightbox/dist/simple-lightbox.min.css';
 
 const form = document.querySelector("#search-form");
 const submit = document.querySelector('[type="submit"]');
@@ -61,7 +63,13 @@ async function doStuff(name, page) {
     };
 
     setTimeout(() => {
-      renderPosts(hits);
+      gallery.insertAdjacentHTML("beforeend", renderPosts(hits));
+
+      new SimpleLightbox('.gallery a', {
+        captionsData: 'alt',
+        captionDelay: 250,
+      });
+
       setTimeout(() => {
         const photoCards = document.querySelectorAll(".photo-card");
 
@@ -138,10 +146,12 @@ function onLoadMore() {
 
 
 function renderPosts(hits) {
-  const markup = hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
+  return hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
     return `
-      <div class="photo-card is-hidden">
-        <img src="${webformatURL}" alt="${tags}" loading="lazy" />
+      <div class="photo-card is-hidden gallery__item" >
+        <a class="gallery__item" href="${largeImageURL}">
+          <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
+        </a>
         <div class="info">
           <p class="info-item">
             <b>Likes</b> ${likes}
@@ -159,6 +169,12 @@ function renderPosts(hits) {
       </div>
     `;
   }).join("");
-
-  gallery.insertAdjacentHTML("beforeend", markup);
 };
+
+gallery.addEventListener('click', evt => {
+  evt.preventDefault();
+
+  if (!evt.target.classList.contains('gallery__image')) {
+    return;
+  };
+});
