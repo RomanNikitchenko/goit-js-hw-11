@@ -12,6 +12,11 @@ const gallery = document.querySelector(".gallery");
 
 btnLoadMore.classList.add("is-hidden");
 
+let simpl = new SimpleLightbox('.gallery a', {
+  captionsData: 'alt',
+  captionDelay: 250,
+});
+
 let name = '';
 let page = 1;
 let limit = 40;
@@ -65,10 +70,7 @@ async function doStuff(name, page) {
     setTimeout(() => {
       gallery.insertAdjacentHTML("beforeend", renderPosts(hits));
 
-      new SimpleLightbox('.gallery a', {
-        captionsData: 'alt',
-        captionDelay: 250,
-      });
+      simpl.refresh();
 
       setTimeout(() => {
         const photoCards = document.querySelectorAll(".photo-card");
