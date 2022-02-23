@@ -2,8 +2,8 @@ import './css/styles.css';
 import debounce from 'lodash.debounce';
 import fetchPixabay from './fetchPixabayserver';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import SimpleLightbox from 'simplelightbox';
-import 'simplelightbox/dist/simple-lightbox.min.css';
+import simpleLightbox from './simpleLightbox';
+import renderPosts from './renderPosts';
 
 const form = document.querySelector("#search-form");
 const submit = document.querySelector('[type="submit"]');
@@ -11,11 +11,6 @@ const btnLoadMore = document.querySelector(".load-more");
 const gallery = document.querySelector(".gallery");
 
 btnLoadMore.classList.add("is-hidden");
-
-let simpl = new SimpleLightbox('.gallery a', {
-  captionsData: 'alt',
-  captionDelay: 250,
-});
 
 let name = '';
 let page = 1;
@@ -70,7 +65,7 @@ async function doStuff(name, page) {
     setTimeout(() => {
       gallery.insertAdjacentHTML("beforeend", renderPosts(hits));
 
-      simpl.refresh();
+      simpleLightbox.refresh();
 
       setTimeout(() => {
         const photoCards = document.querySelectorAll(".photo-card");
@@ -87,14 +82,12 @@ async function doStuff(name, page) {
       }, 200);
     }, 300);
 
-
   } catch (error) {
     console.log(error.message);
   };
 };
 
 form.addEventListener("submit", onSearch);
-
 function onSearch(e) {
   e.preventDefault();
 
@@ -137,7 +130,6 @@ function onSearch(e) {
 
 
 btnLoadMore.addEventListener('click', debounce(onLoadMore, 300));
-
 function onLoadMore() {
   btnLoadMore.classList.add("is-hidden");
   
@@ -146,32 +138,6 @@ function onLoadMore() {
   doStuff(name, page);
 };
 
-
-function renderPosts(hits) {
-  return hits.map(({ webformatURL, largeImageURL, tags, likes, views, comments, downloads }) => {
-    return `
-      <div class="photo-card is-hidden gallery__item" >
-        <a class="gallery__item" href="${largeImageURL}">
-          <img class="gallery__image" src="${webformatURL}" alt="${tags}" loading="lazy" />
-        </a>
-        <div class="info">
-          <p class="info-item">
-            <b>Likes</b> ${likes}
-          </p>
-          <p class="info-item">
-            <b>Views</b> ${views}
-          </p>
-          <p class="info-item">
-            <b>Comments</b> ${comments}
-          </p>
-          <p class="info-item">
-            <b>Downloads</b> ${downloads}
-          </p>
-        </div>
-      </div>
-    `;
-  }).join("");
-};
 
 gallery.addEventListener('click', evt => {
   evt.preventDefault();
