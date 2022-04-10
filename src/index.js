@@ -2,8 +2,17 @@ import './css/styles.css';
 import debounce from 'lodash.debounce';
 import fetchPixabay from './fetchPixabayserver';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Loading } from 'notiflix/build/notiflix-loading-aio';
 import simpleLightbox from './simpleLightbox';
 import renderPosts from './renderPosts';
+
+Loading.circle('Loading...', {
+backgroundColor: 'rgba(0,0,0,0.8)',
+});
+
+setTimeout(() => {
+  Loading.remove();
+}, 500);
 
 const form = document.querySelector("#search-form");
 const submit = document.querySelector('[type="submit"]');
@@ -19,10 +28,16 @@ let disabled = false;
 
 async function doStuff(name, page) {
   try {
+
+    Loading.circle('Loading...', {
+      backgroundColor: 'rgba(0,0,0,0.8)',
+    });
+
     const picture = await fetchPixabay(name, page, limit);
     const { total, totalHits, hits } = picture;
 
     if (!hits.length) {
+      Loading.remove();
       Notify.failure("Sorry, there are no images matching your search query. Please try again.");
 
       btnLoadMore.classList.add("is-hidden");
@@ -34,6 +49,7 @@ async function doStuff(name, page) {
       return;
 
     } else if (hits.length < limit && page === 1) {
+      Loading.remove();
       Notify.success(`Hooray! We found ${totalHits} images.`);
 
       btnLoadMore.classList.add("is-hidden");
@@ -43,11 +59,13 @@ async function doStuff(name, page) {
       }, 300);
 
     } else if (hits.length < limit) {
+      Loading.remove();
       Notify.info("We're sorry, but you've reached the end of search results.");
 
       btnLoadMore.classList.add("is-hidden");
 
     } else if (page === 1) {
+      Loading.remove();
       Notify.success(`Hooray! We found ${totalHits} images.`);
 
       gallery.innerHTML = '';
@@ -87,13 +105,20 @@ async function doStuff(name, page) {
   };
 };
 
+
 form.addEventListener("submit", onSearch);
+
 function onSearch(e) {
   e.preventDefault();
+
+  Loading.circle('Loading...', {
+    backgroundColor: 'rgba(0,0,0,0.8)',
+  });
 
   if (disabled) {
     return;
   };
+
   disabled = true;
 
   submit.setAttribute("disabled", "disabled");
@@ -109,6 +134,7 @@ function onSearch(e) {
   const { searchQuery } = elements;
 
   if (!searchQuery.value) {
+    Loading.remove(1000);
     Notify.warning("line is empty");
 
     setTimeout(() => {
@@ -130,6 +156,7 @@ function onSearch(e) {
 
 
 btnLoadMore.addEventListener('click', debounce(onLoadMore, 300));
+
 function onLoadMore() {
   btnLoadMore.classList.add("is-hidden");
   
