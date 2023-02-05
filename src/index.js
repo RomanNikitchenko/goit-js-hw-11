@@ -34,7 +34,7 @@ async function doStuff(name, page) {
     });
 
     const picture = await fetchPixabay(name, page, limit);
-    const { total, totalHits, hits } = picture;
+    const { totalHits, hits } = picture;
 
     if (!hits.length) {
       Loading.remove();
@@ -99,6 +99,8 @@ async function doStuff(name, page) {
         };
       }, 200);
     }, 300);
+
+    Loading.remove();
 
   } catch (error) {
     console.log(error.message);
